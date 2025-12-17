@@ -146,6 +146,7 @@ public class Menu {
     }
 
     private void playGame() {
+        if(forest.isGameOver()) {System.out.println("Please first reset the game as a new round has not been setup yet"); return;}
         String choice = "";
         do {
             System.out.println(forest.getGamePlan());
@@ -160,7 +161,7 @@ public class Menu {
                 case "q": System.out.println("Thanks for playing!"); break;
                 default: System.out.println("Not a valid option, Try again"); break;
             }
-            if(forest.isGameOver()) {System.out.println("The game is over!"); break;}
-        } while(!choice.equals("q"));
+            if(forest.isGameOver()) {System.out.println("The game is over! Type 'm' for menu options"); break;}
+        } while(!choice.equals("q") && !forest.isGameOver());
     }
 }

@@ -123,64 +123,77 @@ public class Forest {
         if(isGameOver()) {status.append("The game is over!\n"); return;} // Return if the game is over
 
         if(!(map.containsKey(newPos) || !isInBound(newPos))) { // If there is an item or is out of bounds
-            player.getPosition().move(relative);
+            // Move the player, update map
             map.remove(playerPos);
+            playerPos.move(relative);
             map.put(player.getPosition(), player);
             
             status.append("Player moved\n");
         } else {
+            // Nothing happens, the player couldnt move there
             status.append("Player couldn't move\n");
             return;
         }
 
-        /*  Hunter Behaviour:
-            If the player is in sight (distance of 5 or less)
-            Move directly toward the player
-            Else
-            Wander around the map
-         */
-
-        // TODO Wolf geht in die starter ecke??
-        map.remove(hunter.getPosition());
-        map.put(nextHunterMove(playerPos, hunterPos), hunter);
-
+        // Hunter moves
+        moveHunter(playerPos, hunterPos);
+        if(hunterPos.equals(playerPos)) {
+            status.append("Ohh no! The hunter captured the player!");
+            gameOver = true;
+        }
     }
 
 
 
-
-    private Position nextHunterMove(Position playerPos, Position hunterPos) {
-        Position newPos;
+    /*  Hunter Behaviour:
+            If the player is in sight (distance of 5 or less)
+            Move directly toward the player
+            Else
+            Wander around the map
+     */
+    private void moveHunter(Position playerPos, Position hunterPos) {
+        Position newPos = new Position(hunterPos);
         Position relative = new Position(0, 0);
 
+        Random rand = new Random();
+
         if(!playerInSight(playerPos, hunterPos)) { // If not in sight wander randomly around
-            Random rand = new Random();
             do {
                 int a = rand.nextInt(4); // Pick a random direction
                 switch (a) {
-                    case 1:
+                    case 0:
                         relative = new Position(0, 1); break;
-                    case 2:
+                    case 1:
                         relative = new Position(-1,0); break;
-                    case 3:
+                    case 2:
                         relative = new Position(0, -1); break;
-                    case 4:
+                    case 3:
                         relative = new Position(1, 0); break;
                 }
-                newPos = hunterPos;
                 newPos.move(relative); // Move to that direction
-            } while(!isInBound(newPos) || map.containsKey(newPos)); // While there is no obstacle or the move would be out of bounds
-            return newPos;
+            } while(!tryHunterMove(relative)); // Retry if move unsuccessful
+            return;
         }
 
+
+        // Targeting the player
         int playerX = playerPos.getX(); int playerY = playerPos.getY();
         int hunterX = hunterPos.getX(); int hunterY = hunterPos.getY();
-
-        //if(playerX > )
-
-        // TODO wolf move on sight; x,y difference to zero? Dijkstra?
-
-        return new Position(0, 0);
+        int diffX = hunterX == playerX ? 0 : hunterX - playerX > 0 ? -1 : 1; // 0 if on the same lvl; 1 if X of the player is greater; else -1
+        int diffY = hunterY == playerY ? 0 : hunterY - playerY > 0 ? -1 : 1; // 0 if on the same lvl; 1 if Y of the player is greater; else -1
+        
+        // Try to get closer on the x axis
+        if(diffX != 0) {
+            if(tryHunterMove(new Position(diffX, 0))) {
+                return;
+            }
+        }
+        // Try to get closer on the y axis
+        if(diffY != 0) {
+            if(tryHunterMove(new Position(0, diffY))) {
+                return;
+            }
+        }
     }
 
     private boolean playerInSight(Position playerPos, Position hunterPos) { // return if the player is 5 units or less away
@@ -189,14 +202,15 @@ public class Forest {
         return distance <= 4.0;
     }
 
-    private boolean tryHunterMove(Position relative) {
-        Position newPos = hunter.getPosition();
+    private boolean tryHunterMove(Position relative) { // Try to move the hunter; Return true if successful
+        Position newPos = new Position(hunter.getPosition());
         newPos.move(relative);
 
-        if(map.containsKey(newPos) && !newPos.equals(player.getPosition())) {
+        if(!isInBound(newPos) || (map.containsKey(newPos) && !newPos.equals(player.getPosition()))) { // Check if there is an item which is not the player or if newPos is out of bounds
             return false;
         }
 
+        // Update position and map
         map.remove(hunter.getPosition());
         hunter.getPosition().move(relative);
         map.put(hunter.getPosition(), hunter);
