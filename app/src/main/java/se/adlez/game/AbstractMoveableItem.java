@@ -10,8 +10,7 @@ public abstract class AbstractMoveableItem extends AbstractItem implements Movea
 
     @Override
     public String toString() {
-        // TODO
-        return "";
+        return String.format("%s %s (%d %d)", getDescription(), getGraphic(), position.getX(), position.getY());
     }
 
     public Position getPosition() {return position;}

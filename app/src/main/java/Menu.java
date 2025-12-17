@@ -1,9 +1,15 @@
+import java.util.Random;
 import java.util.Scanner;
 
+import se.adlez.game.AbstractMoveableItem;
+import se.adlez.game.Castle;
 import se.adlez.game.FirTree;
 import se.adlez.game.Forest;
+import se.adlez.game.Item;
 import se.adlez.game.Position;
+import se.adlez.game.Robot;
 import se.adlez.game.Rock;
+import se.adlez.game.Wolf;
 
 public class Menu {
     private Scanner scanner;
@@ -22,22 +28,31 @@ public class Menu {
             choice = scanner.nextLine();
             switch (choice) {
                 case "1":
+                    // initialize the Forest
                     forest = new Forest();
                     break;
                 case "2":
+                    // Print the game board
                     System.out.println(forest.getGamePlan());
                     break;
                 case "3":
+                    // Add an item
                     addItem();
                     break;
                 case "4":
+                    // Print all the items
                     System.out.println(forest.listItems());
                     break;
                 case "5":
+                    // Add 5 Rocks and Trees
+                    add5Each();
                     break;
                 case "6":
+                    // Add player, hunter and the home
+                    addMovables();
                     break;
                 case "7":
+                    playGame();
                     break;
                 case "m":
                     printMenu();
@@ -104,5 +119,48 @@ public class Menu {
 
         forest.addItem((choice.equals("1")) ? new FirTree() : new Rock(), new Position(x, y));
         System.out.println(String.format("Added item to the forest: %s (%d, %d)",(choice.equals("1") ? "Firtree 🌲" : "Rock 🪨 "), x, y));
+    }
+
+    private void add5Each() {
+        Random rand = new Random();
+        int x, y;
+        Item item;
+        for(int i = 0; i < 10; i++) { // Add 5 Rocks and 5 Firtrees at a random empty position
+            do {
+                item = i < 5 ? new Rock() : new FirTree();
+                x = rand.nextInt(10);
+                y = rand.nextInt(10);
+            } while(!forest.tryAddItem(item, new Position(x, y)));
+            System.out.println(String.format("%s (%d %d)", item.toString(), x, y));
+        }
+    }
+
+    private void addMovables() {
+        AbstractMoveableItem player = new Robot(new Position(0, 0));
+        AbstractMoveableItem hunter = new Wolf(new Position(7, 4));
+        AbstractMoveableItem home = new Castle(new Position(4, 7));
+
+        forest.addPlayerItem(player);
+        forest.addHunterItem(hunter);
+        forest.addHomeItem(home);
+    }
+
+    private void playGame() {
+        String choice = "";
+        do {
+            System.out.println(forest.getGamePlan());
+            System.out.print("Move the player (w, a, s, d)     q : quit\n>>> ");
+            choice = scanner.nextLine();
+
+            switch (choice) {
+                case "w": forest.movePlayer(new Position(0, 1)); break;
+                case "a": forest.movePlayer(new Position(-1, 0)); break;
+                case "s": forest.movePlayer(new Position(0,  -1)); break;
+                case "d": forest.movePlayer(new Position(1, 0)); break;
+                case "q": System.out.println("Thanks for playing!"); break;
+                default: System.out.println("Not a valid option, Try again"); break;
+            }
+            if(forest.isGameOver()) {System.out.println("The game is over!"); break;}
+        } while(!choice.equals("q"));
     }
 }

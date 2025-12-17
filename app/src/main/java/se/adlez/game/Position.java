@@ -37,6 +37,7 @@ public class Position {
     }
 
     public void move(Position relative) {
-        // TODO
+        x += relative.getX();
+        y += relative.getY();
     }
 }
