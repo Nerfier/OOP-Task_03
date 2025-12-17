@@ -32,7 +32,7 @@ public class Forest {
 
 
 
-    public String getGamePlan() {
+    public String getGamePlan() { // return the Gameplan as a string
         String[][] mapArr = new String[HEIGHT][WIDTH];
         StringBuilder s = new StringBuilder();
 
@@ -123,9 +123,9 @@ public class Forest {
         if(isGameOver()) {status.append("The game is over!\n"); return;} // Return if the game is over
 
         if(!(map.containsKey(newPos) || !isInBound(newPos))) { // If there is an item or is out of bounds
-            player = new Robot(newPos);
+            player.getPosition().move(relative);
             map.remove(playerPos);
-            map.put(newPos, player);
+            map.put(player.getPosition(), player);
             
             status.append("Player moved\n");
         } else {
@@ -173,6 +173,11 @@ public class Forest {
             return newPos;
         }
 
+        int playerX = playerPos.getX(); int playerY = playerPos.getY();
+        int hunterX = hunterPos.getX(); int hunterY = hunterPos.getY();
+
+        //if(playerX > )
+
         // TODO wolf move on sight; x,y difference to zero? Dijkstra?
 
         return new Position(0, 0);
@@ -182,6 +187,20 @@ public class Forest {
         // Pythagora's theorem to get distance from hunter to player
         double distance = Math.sqrt(Math.pow(playerPos.getX() - hunterPos.getX(), 2) + Math.pow(hunterPos.getY() - playerPos.getY(), 2));
         return distance <= 4.0;
+    }
+
+    private boolean tryHunterMove(Position relative) {
+        Position newPos = hunter.getPosition();
+        newPos.move(relative);
+
+        if(map.containsKey(newPos) && !newPos.equals(player.getPosition())) {
+            return false;
+        }
+
+        map.remove(hunter.getPosition());
+        hunter.getPosition().move(relative);
+        map.put(hunter.getPosition(), hunter);
+        return true;
     }
 
 
