@@ -29,7 +29,7 @@ public class Menu {
         do {
             System.out.print(">>> ");
             choice = scanner.nextLine();
-            if(!isInitialized() && !(choice.equals("1") || choice.equals("q") || choice.equals("Q") || choice.equals("m"))) {
+            if(!isInitialized() && !(choice.equals("1") || choice.equals("q") || choice.equals("Q") || choice.equals("m") || choice.equals("9"))) {
                 System.out.println("Please first initialize the forest!");
                 continue;
             }
@@ -94,18 +94,12 @@ public class Menu {
     private void printMenu() {
         String s = """
  -----------------
-| 1) Create an empty forest
-| 2) Print the forest
-| 3) Add items (tree, rock) to the forest
-| 4) List all items in the forest
-| 5) Add 5 trees and 5 stones to the forest
-| 6) Add player, hunter and the home
-| 7) Play game
-| 8) Save game to file
-| 9) Load game from file
-| p) print the forest as JSON
-| s) save the forest as JSON
-| m) Print menu
+| 1) Create an empty forest                     | 7) Play game
+| 2) Print the forest                           | 8) Save game to file
+| 3) Add items (tree, rock) to the forest       | 9) Load game from file
+| 4) List all items in the forest               | p) print the forest as JSON
+| 5) Add 5 trees and 5 stones to the forest     | s) save the forest as JSON
+| 6) Add player, hunter and the home            | m) Print menu
 | qQ) Quit
  -----------------""";;
         System.out.println(s);
@@ -172,11 +166,13 @@ public class Menu {
     }
 
     private void playGame() {
-        if(forest.isGameOver()) {System.out.println("Please first reset the game as a new round has not been setup yet"); return;}
+        if(forest.isGameOver()) {System.out.println("Please first intialze a new forest as a new round has not been setup yet"); return;}
+        if(forest.getHunter() == null) {System.out.println("Please first add a player, hunter and home to the forest"); return;}
+
         String choice = "";
         do {
             System.out.println(forest.getGamePlan());
-            System.out.print("Move the player (w, a, s, d)     q : quit\n>>> ");
+            System.out.print("Move the player (w, a, s, d)     q : quit\nMove: ");
             choice = scanner.nextLine();
 
             switch (choice) {

@@ -132,7 +132,6 @@ public class Forest implements Serializable{
         } else {
             // Nothing happens, the player couldnt move there
             status.append("Player couldn't move\n");
-            return;
         }
 
         // Hunter moves
@@ -229,4 +228,7 @@ public class Forest implements Serializable{
     public String getStatus() {return status.toString();}
     public int getWIDTH() {return WIDTH;}
     public int getHEIGHT() {return HEIGHT;}
+    public AbstractMoveableItem getPlayer() {return player;}
+    public AbstractMoveableItem getHome() {return home;}
+    public AbstractMoveableItem getHunter() {return hunter;}
 }

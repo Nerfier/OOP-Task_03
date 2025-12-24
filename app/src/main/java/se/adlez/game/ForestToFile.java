@@ -55,7 +55,6 @@ public class ForestToFile {
             System.out.println("Loaded serialized forest from file '" + fileName + "'.");
             return f;
         } catch (Exception e) {
-            System.out.println(e);
             System.out.println("Loading a new Forest due to an error");    
         }
         return new Forest();
