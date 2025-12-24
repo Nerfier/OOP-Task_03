@@ -29,7 +29,7 @@ public class Forest implements Serializable{
     }
     
 
-
+    // TODO Alternate skins
 
 
 
@@ -76,7 +76,6 @@ public class Forest implements Serializable{
 
     public void addItem(Item item, Position position) {
         map.put(position, item);
-        // TODO error handling coordinates
     }
 
     public boolean tryAddItem(Item item, Position position) {
@@ -144,7 +143,7 @@ public class Forest implements Serializable{
         }
     }
 
-
+// TODO Smarter Hunter
 
     /*  Hunter Behaviour:
             If the player is in sight (distance of 5 or less)
@@ -228,4 +227,6 @@ public class Forest implements Serializable{
     public boolean isGameOver() {return gameOver;}
 
     public String getStatus() {return status.toString();}
+    public int getWIDTH() {return WIDTH;}
+    public int getHEIGHT() {return HEIGHT;}
 }

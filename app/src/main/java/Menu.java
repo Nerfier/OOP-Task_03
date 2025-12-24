@@ -29,6 +29,10 @@ public class Menu {
         do {
             System.out.print(">>> ");
             choice = scanner.nextLine();
+            if(!isInitialized() && !(choice.equals("1") || choice.equals("q") || choice.equals("Q") || choice.equals("m"))) {
+                System.out.println("Please first initialize the forest!");
+                continue;
+            }
             switch (choice) {
                 case "1":
                     // initialize the Forest
@@ -66,6 +70,14 @@ public class Menu {
                     // Load a forest state from a file
                     forest = toFile.load("forest.ser");
                     break;
+                case "p":
+                    // Print the forest as JSON
+                    System.out.println(toFile.toJSON(forest));
+                    break;
+                case "s":
+                    // Save the forest as JSON
+                    toFile.saveAsJson(forest, "forest.JSON");
+                    break;
                 case "m":
                     printMenu();
                     break;
@@ -91,6 +103,8 @@ public class Menu {
 | 7) Play game
 | 8) Save game to file
 | 9) Load game from file
+| p) print the forest as JSON
+| s) save the forest as JSON
 | m) Print menu
 | qQ) Quit
  -----------------""";;
@@ -102,19 +116,14 @@ public class Menu {
         int x, y;
 
         while(true) {
-            try {
-                System.out.print("Add FirTree 🌲 (1) or Rock 🪨  (2) >>> ");
-                choice = scanner.nextLine();
-                if(!(choice.equals("1") || choice.equals("2"))) {
-                    throw new NumberFormatException("You must enter a 1 or a 2");
-                }
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println(e);
+            System.out.print("Add FirTree 🌲 (1) or Rock 🪨  (2) >>> ");
+            choice = scanner.nextLine();
+            if(!(choice.equals("1") || choice.equals("2"))) {
+                System.out.println("You must enter a 1 or a 2");
+                continue;
             }
+            break;
         }
-
-// TODO Error Handling for out of bounds coordinates
 
         while(true) {
             System.out.print("Set position x y (seperate by space): >>> ");
@@ -122,10 +131,13 @@ public class Menu {
             try {
                 x = Integer.parseInt(xy.split(" ")[0]);
                 y = Integer.parseInt(xy.split(" ")[1]);
-
+                if(!(x >= 0 && x < forest.getWIDTH()) || !(y >= 0 && y < forest.getHEIGHT())) {
+                    System.out.println(String.format("X ( 0 - %d )   Y ( 0 - %d )", forest.getWIDTH() - 1, forest.getHEIGHT() - 1));
+                    continue;
+                }
                 break;
             } catch (NumberFormatException e) {
-                System.out.println("The coordinates have to be two integers seperated by a space");
+                System.out.println("The coordinates have to be two integers by a space");
             }
 
         }
@@ -178,4 +190,6 @@ public class Menu {
             if(forest.isGameOver()) {System.out.println("The game is over! Type 'm' for menu options"); break;}
         } while(!choice.equals("q") && !forest.isGameOver());
     }
+
+    private boolean isInitialized() {return forest != null;}
 }
