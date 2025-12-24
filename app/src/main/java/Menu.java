@@ -10,13 +10,16 @@ import se.adlez.game.Position;
 import se.adlez.game.Robot;
 import se.adlez.game.Rock;
 import se.adlez.game.Wolf;
+import se.adlez.game.ForestToFile;
 
 public class Menu {
     private Scanner scanner;
     private Forest forest;
+    private ForestToFile toFile;
 
     public Menu() {
         scanner = new Scanner(System.in);
+        toFile = new ForestToFile();
     } 
 
     public void run() {
@@ -52,7 +55,16 @@ public class Menu {
                     addMovables();
                     break;
                 case "7":
+                    // Play the game
                     playGame();
+                    break;
+                case "8":
+                    // Save the forest state
+                    toFile.save(forest, "forest.ser");
+                    break;
+                case "9":
+                    // Load a forest state from a file
+                    forest = toFile.load("forest.ser");
                     break;
                 case "m":
                     printMenu();
@@ -77,6 +89,8 @@ public class Menu {
 | 5) Add 5 trees and 5 stones to the forest
 | 6) Add player, hunter and the home
 | 7) Play game
+| 8) Save game to file
+| 9) Load game from file
 | m) Print menu
 | qQ) Quit
  -----------------""";;
