@@ -6,11 +6,13 @@ import se.adlez.game.Castle;
 import se.adlez.game.FirTree;
 import se.adlez.game.Forest;
 import se.adlez.game.Item;
+import se.adlez.game.Monkey;
 import se.adlez.game.Position;
 import se.adlez.game.Robot;
 import se.adlez.game.Rock;
 import se.adlez.game.Wolf;
 import se.adlez.game.ForestToFile;
+import se.adlez.game.Fox;
 
 public class Menu {
     private Scanner scanner;
@@ -156,7 +158,32 @@ public class Menu {
     }
 
     private void addMovables() {
-        AbstractMoveableItem player = new Robot(new Position(0, 0));
+        String skin = "";
+        AbstractMoveableItem player;
+        System.out.println("""
+            Choose a skin for the player:
+            1: Robot 🤖
+            2: Monkey 🐒
+            3: Fox 🦊
+            Your choice: """);
+         skin = scanner.nextLine();
+        
+        switch (skin) {
+            case "1":
+                player = new Robot(new Position(0, 0));
+                break;
+            case "2":
+                player = new Monkey(new Position(0, 0));
+                break;
+            case "3":
+                player = new Fox(new Position(0, 0));
+                break;
+            default:
+                System.out.println("Not a valid choice. Using default skin (Robot).");
+                player = new Robot(new Position(0, 0));
+                break;
+        }
+
         AbstractMoveableItem hunter = new Wolf(new Position(7, 4));
         AbstractMoveableItem home = new Castle(new Position(4, 7));
 
@@ -168,10 +195,10 @@ public class Menu {
     private void playGame() {
         if(forest.isGameOver()) {System.out.println("Please first intialze a new forest as a new round has not been setup yet"); return;}
         if(forest.getHunter() == null) {System.out.println("Please first add a player, hunter and home to the forest"); return;}
+        System.out.println(forest.getGamePlan());
 
         String choice = "";
         do {
-            System.out.println(forest.getGamePlan());
             System.out.print("Move the player (w, a, s, d)     q : quit\nMove: ");
             choice = scanner.nextLine();
 
@@ -183,7 +210,11 @@ public class Menu {
                 case "q": System.out.println("Thanks for playing!"); break;
                 default: System.out.println("Not a valid option, Try again"); break;
             }
-            if(forest.isGameOver()) {System.out.println("The game is over! Type 'm' for menu options"); break;}
+            System.out.println(forest.getGamePlan());
+            if(forest.isGameOver()) {
+                System.out.println("The game is over! Type 'm' for menu options"); 
+                return;
+            }
         } while(!choice.equals("q") && !forest.isGameOver());
     }
 

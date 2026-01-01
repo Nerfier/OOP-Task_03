@@ -1,9 +1,12 @@
 package se.adlez.game;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
+import java.util.NoSuchElementException;
 
 public class Forest implements Serializable{
     private final int WIDTH = 10;
@@ -27,11 +30,6 @@ public class Forest implements Serializable{
         status = new StringBuilder();
         map = new HashMap<Position,Item>();
     }
-    
-
-    // TODO Alternate skins
-
-
 
     public String getGamePlan() { // return the Gameplan as a string
         String[][] mapArr = new String[HEIGHT][WIDTH];
@@ -63,9 +61,12 @@ public class Forest implements Serializable{
 
     public String listItems() {
         String s = "";
+        if(map.keySet().size() == 0) {return "No items added yet";}
+
         for(Position pos : map.keySet()) {
             s += String.format("(%d, %d) %s\n", pos.getX(), pos.getY(), map.get(pos).toString());
         }
+
         return s;
     }
 
@@ -135,87 +136,99 @@ public class Forest implements Serializable{
         }
 
         // Hunter moves
-        moveHunter(playerPos, hunterPos);
-        if(hunterPos.equals(playerPos)) {
-            status.append("Ohh no! The hunter captured the player!");
-            gameOver = true;
+        Position newHunterPos;
+        try {
+            ArrayList<Position> path = A_Star(hunterPos, playerPos);
+            path.removeLast();
+            newHunterPos = path.getLast();
+        } catch (NoSuchElementException e) {
+            newHunterPos = new Position(hunterPos);
         }
-    }
-
-// TODO Smarter Hunter
-
-    /*  Hunter Behaviour:
-            If the player is in sight (distance of 5 or less)
-            Move directly toward the player
-            Else
-            Wander around the map
-     */
-    private void moveHunter(Position playerPos, Position hunterPos) {
-        Position newPos = new Position(hunterPos);
-        Position relative = new Position(0, 0);
-
-        Random rand = new Random();
-
-        if(!playerInSight(playerPos, hunterPos)) { // If not in sight wander randomly around
-            do {
-                int a = rand.nextInt(4); // Pick a random direction
-                switch (a) {
-                    case 0:
-                        relative = new Position(0, 1); break;
-                    case 1:
-                        relative = new Position(-1,0); break;
-                    case 2:
-                        relative = new Position(0, -1); break;
-                    case 3:
-                        relative = new Position(1, 0); break;
-                }
-                newPos.move(relative); // Move to that direction
-            } while(!tryHunterMove(relative)); // Retry if move unsuccessful
-            return;
-        }
-
-
-        // Targeting the player
-        int playerX = playerPos.getX(); int playerY = playerPos.getY();
-        int hunterX = hunterPos.getX(); int hunterY = hunterPos.getY();
-        int diffX = hunterX == playerX ? 0 : hunterX - playerX > 0 ? -1 : 1; // 0 if on the same lvl; 1 if X of the player is greater; else -1
-        int diffY = hunterY == playerY ? 0 : hunterY - playerY > 0 ? -1 : 1; // 0 if on the same lvl; 1 if Y of the player is greater; else -1
         
-        // Try to get closer on the x axis
-        if(diffX != 0) {
-            if(tryHunterMove(new Position(diffX, 0))) {
-                return;
-            }
-        }
-        // Try to get closer on the y axis
-        if(diffY != 0) {
-            if(tryHunterMove(new Position(0, diffY))) {
-                return;
-            }
-        }
-    }
-
-    private boolean playerInSight(Position playerPos, Position hunterPos) { // return if the player is 5 units or less away
-        // Pythagora's theorem to get distance from hunter to player
-        double distance = Math.sqrt(Math.pow(playerPos.getX() - hunterPos.getX(), 2) + Math.pow(hunterPos.getY() - playerPos.getY(), 2));
-        return distance <= 4.0;
-    }
-
-    private boolean tryHunterMove(Position relative) { // Try to move the hunter; Return true if successful
-        Position newPos = new Position(hunter.getPosition());
-        newPos.move(relative);
-
-        if(!isInBound(newPos) || (map.containsKey(newPos) && !newPos.equals(player.getPosition()))) { // Check if there is an item which is not the player or if newPos is out of bounds
-            return false;
-        }
-
-        // Update position and map
-        map.remove(hunter.getPosition());
-        hunter.getPosition().move(relative);
+        Position hunterRelative = new Position(newHunterPos.getX() - hunterPos.getX(), newHunterPos.getY() - hunterPos.getY());
+        map.remove(hunterPos);
+        hunterPos.move(hunterRelative);
         map.put(hunter.getPosition(), hunter);
-        return true;
+        if(newHunterPos.equals(player.getPosition())) {
+            gameOver = true;
+            status.append("Damn! The hunter caught the player!");
+        }
     }
 
+    private ArrayList<Position> reconstructPath(Map<Position, Position> cameFrom, Position current) {
+        ArrayList<Position> path = new ArrayList<>();
+        path.add(current);
+
+        while(cameFrom.keySet().contains(current)) {
+            current = cameFrom.get(current);
+            path.add(current);
+        }
+
+        return path;
+    }
+
+    private ArrayList<Position> A_Star(Position hunterPos, Position playerPos) {
+        Position[] dir = {new Position(1, 0), 
+                          new Position(-1, 0), 
+                          new Position(0, 1), 
+                          new Position(0, -1)};
+
+        Set<Position> openSet = new HashSet<>();
+        openSet.add(hunterPos);
+
+        Map<Position, Position> cameFrom = new HashMap<>();
+
+        Map<Position, Integer> gScore = new HashMap<>();
+        gScore.put(hunterPos, 0);
+
+        Map<Position, Integer> fScore = new HashMap<>();
+        fScore.put(hunterPos, heuristics(hunterPos, playerPos));
+
+        while(!openSet.isEmpty()) {
+            int min = Integer.MAX_VALUE;
+            Position minPos = null;
+            for(Position pos : openSet) {
+                if(fScore.getOrDefault(pos, Integer.MAX_VALUE) < min) {
+                    min = fScore.get(pos);
+                    minPos = pos;
+                }
+            }
+
+            Position current = minPos;
+            openSet.remove(current);
+
+            if(current.equals(playerPos)) {
+                return reconstructPath(cameFrom, current);
+            }
+
+            for(Position relative : dir) {
+                Position newPos = new Position(current);
+                newPos.move(relative);
+
+                if(isInBound(newPos) && (!map.containsKey(newPos) || newPos.equals(playerPos))) {
+                    int newScore = gScore.get(current) + 1;
+
+                    if(newScore < gScore.getOrDefault(newPos, Integer.MAX_VALUE)) {
+                        cameFrom.put(newPos, current);
+                        gScore.put(newPos, newScore);
+                        fScore.put(newPos, newScore + heuristics(newPos, playerPos));
+                        
+                        if(!openSet.contains(newPos)) {
+                            openSet.add(newPos);
+                        }
+
+                    }
+                }
+                
+            }
+
+        }
+        return new ArrayList<>();
+    }
+
+    private int heuristics(Position current, Position goal) {
+        return Math.abs(current.getX() - goal.getX()) + Math.abs(current.getY() - goal.getY());
+    }
 
 
     private boolean isInBound(Position pos) { // Return true only if the position is inside the game area
