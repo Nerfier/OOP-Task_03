@@ -74,7 +74,7 @@ public class Menu {
                     break;
                 case "p":
                     // Print the forest as JSON
-                    System.out.println(toFile.toJSON(forest));
+                    System.out.println(toFile.toJson(forest));
                     break;
                 case "s":
                     // Save the forest as JSON

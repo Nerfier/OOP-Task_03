@@ -7,11 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import java.util.Scanner;
 
@@ -61,20 +56,11 @@ public class ForestToFile {
     }
 
 
-    public String toJSON(Forest forest) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(forest);
+    public String toJson(Forest forest) {
+        return ForestToJson.toJson(forest);
     }
 
     public void saveAsJson(Forest forest, String filename) {
-        String json = toJSON(forest);
-        Path path = Path.of(filename);
-
-        try {
-            Files.writeString(path, json);
-            System.out.println("Saved JSON data to '" + filename + "'.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        ForestToJson.saveAsJson(forest, filename);
     }  
 }
