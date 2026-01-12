@@ -13,7 +13,8 @@ To run task 2 and 3 go into the directory of the respective task and execute the
 ```
 <details>
 <summary>Run this commands if the execution of the code doesn't work.<\summary>
-```.\gradlew clean run --console plain -q
+```
+.\gradlew clean run --console plain -q
 
 ```
 <\details>
