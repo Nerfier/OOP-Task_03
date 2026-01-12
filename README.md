@@ -10,11 +10,18 @@ At first I had some trouble with migrating the gradle projects to the \a01\ fold
 To run task 2 and 3 go into the directory of the respective task and execute the following command in the terminal:
 ```
 ./gradlew run --console plain -q
-```
-<details>
-<summary>Run this commands if the execution of the code doesn't work.<\summary>
-```
-.\gradlew clean run --console plain -q
 
-```
-<\details>
+
+
+<details>
+<summary>Windows PowerShell: Run `a01-check.ps1`.</summary>
+
+The source code for the script can be [reviewed online](a01-check.ps1).
+
+Download and execute the script like this.
+
+```powershell
+# Execute the script locally, download script from url
+Invoke-Expression (Invoke-WebRequest -Uri "https://gitlab.com/mikael-roos/java/-/raw/main/round/HT25-period-2/script/a01-check.ps1" -UseBasicParsing).Content
+
+</details>
